@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestOCR", "TestOCR\TestOCR.csproj", "{068F3D3C-9A81-4B61-9DD2-E9BB3DEA38A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestOCR", "TestOCR\TestOCR.csproj", "{068F3D3C-9A81-4B61-9DD2-E9BB3DEA38A7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reports", "Reports", "{7079EA84-758D-4E99-9D8E-957BC35C5BF3}"
+	ProjectSection(SolutionItems) = preProject
+		Reports\RPT_Fatture.pbit = Reports\RPT_Fatture.pbit
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
