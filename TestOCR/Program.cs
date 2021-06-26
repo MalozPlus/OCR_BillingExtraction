@@ -1,12 +1,12 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
+using log4net;
+using log4net.Config;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace TestOCR
 {
@@ -17,12 +17,15 @@ namespace TestOCR
         static string subscriptionKey = "585a63258bfe41d589f007db6cb05fc9";
         static string endpoint = "https://demo-billingacquisition.cognitiveservices.azure.com/";
         static string fatturePath = "C:\\Users\\l.maletti\\Documents\\Miei\\AcquisizioneFatture\\Fatture\\";
-        //static string filename = "W2035888689.PDF";
-        static string logFilename = "log.txt";
         static string csvFilename = "data.csv";
 
         static void Main(string[] args)
         {
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+            var _log4net = log4net.LogManager.GetLogger(typeof(Program));
+
             Console.WriteLine("BILLING ACQUISITION");
             var client = Authenticate(endpoint, subscriptionKey);
 
@@ -34,11 +37,8 @@ namespace TestOCR
                 Console.WriteLine("Number of files: " + arrFi.Length.ToString());
 
                 foreach (FileInfo fi in arrFi)
-                {
-                    using (StreamWriter swLog = new StreamWriter(fatturePath + logFilename, true))
-                    {
-                        ReadFile(client, fi, swCsv, swLog).Wait();
-                    }                       
+                {                    
+                    ReadFile(client, fi, swCsv).Wait();                                       
                     Thread.Sleep(6000);
                 }           
             }
@@ -63,8 +63,9 @@ namespace TestOCR
          * READ FILE - URL 
          * Extracts text. 
          */
-        public static async Task ReadFile(ComputerVisionClient client, FileInfo fi, StreamWriter swCsv, StreamWriter swLog)
+        public static async Task ReadFile(ComputerVisionClient client, FileInfo fi, StreamWriter swCsv)
         {
+            var _log4net = log4net.LogManager.GetLogger(typeof(Program));
             Console.WriteLine("READ FILE " + fi.Name);
 
             FileStream fsPdf = fi.OpenRead();
@@ -94,9 +95,7 @@ namespace TestOCR
             Amount billingImport = new Amount();
             EmissionDate emissionDate = new EmissionDate();
 
-
-            swLog.WriteLine("\n");
-            swLog.WriteLine(fi.Name);
+            _log4net.Info("Filename: " + fi.Name);
             foreach (ReadResult page in textUrlFileResults)
             {                    
                 foreach (Line line in page.Lines)
@@ -107,7 +106,7 @@ namespace TestOCR
                     string textvalue = line.Text.Trim();
                     billingImport.CheckValue(textvalue);
                     emissionDate.CheckValue(textvalue);
-                    swLog.WriteLine(line.Text);
+                    _log4net.Info("Extracted: " + line.Text);
                 }
             }
             
