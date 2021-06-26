@@ -91,8 +91,8 @@ namespace TestOCR
 
             // Display the found text.
             var textUrlFileResults = results.AnalyzeResult.ReadResults;
-            Importo billingImport = new Importo();
-            DataEmissione emissionDate = new DataEmissione();
+            Amount billingImport = new Amount();
+            EmissionDate emissionDate = new EmissionDate();
 
 
             swLog.WriteLine("\n");
@@ -117,56 +117,9 @@ namespace TestOCR
         }
     }
 
-    public class Importo
-    {
-        public bool MustCheck = false;
-        public bool Found = false;
-        public string TextValue = null;
-        public float Value;
-        public const string Token = "TOTALE CONTO TELEFONICO";
+   
 
-
-        public void CheckValue(string textExtracted)
-        {
-            if (!this.Found)
-            {
-                this.MustCheck = this.MustCheck || textExtracted.Equals(Token, StringComparison.InvariantCultureIgnoreCase);
-                if (this.MustCheck)
-                {
-                    if (float.TryParse(textExtracted, out this.Value))
-                    {
-                        this.Found = true;
-                        this.TextValue = textExtracted;
-                    }
-                }
-            }
-        }
-    }
-
-    public class DataEmissione
-    {
-        public bool MustCheck = false;
-        public bool Found = false;
-        public string TextValue = null;
-        public DateTime Value;
-        public const string Token = "Data emissione fattura";
-        public void CheckValue(string textExtracted)
-        {
-            if (!this.Found)
-            {
-                this.MustCheck = this.MustCheck || textExtracted.Equals(Token, StringComparison.InvariantCultureIgnoreCase);
-                if (this.MustCheck)
-                {
-                    var culture = CultureInfo.CreateSpecificCulture("it-IT");
-                    if (DateTime.TryParse(textExtracted, culture, DateTimeStyles.None, out this.Value))
-                    {
-                        this.Found = true;
-                        this.TextValue = textExtracted;
-                    }
-                }
-            }
-        }
-    }
+    
 
 
 }
