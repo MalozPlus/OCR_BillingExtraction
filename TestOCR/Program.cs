@@ -1,10 +1,14 @@
 ﻿
 using System;
+using System.Linq;
 using log4net;
 using log4net.Config;
 using System.IO;
 using System.Threading;
 using System.Reflection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace TestOCR
 {
@@ -35,7 +39,13 @@ namespace TestOCR
 
                 foreach (FileInfo fi in arrFi)
                 {
-                    ocrClient.ReadFile(fi, swCsv).Wait();                                       
+                    Task<List<EntityToFind>> tskReadFile = ocrClient.ReadFile(fi);
+                    tskReadFile.Wait();
+
+                    StringBuilder sb = new StringBuilder(fi.Name.Split('.')[0]);
+                    tskReadFile.Result.ForEach(x => sb.Append(";" + x.ValueToString()));
+                    swCsv.WriteLine(sb.ToString());
+                    swCsv.Flush();
                     Thread.Sleep(6000);
                 }           
             }

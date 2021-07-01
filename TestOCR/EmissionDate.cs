@@ -27,5 +27,10 @@ namespace TestOCR
             }
         }
 
+        public new string ValueToString()
+        {
+            return this.Value.ToString("dd/MM/yyyy");
+        }
+
     }
 }

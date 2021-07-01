@@ -3,7 +3,7 @@ using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +14,7 @@ namespace TestOCR
         private const string subscriptionKey = "585a63258bfe41d589f007db6cb05fc9";
         private const string endpoint = "https://demo-billingacquisition.cognitiveservices.azure.com/";
         private ComputerVisionClient _client = null;
+        private log4net.ILog _log4net = log4net.LogManager.GetLogger(typeof(Program));
 
         /*
          * AUTHENTICATE
@@ -32,10 +33,13 @@ namespace TestOCR
         * READ FILE - URL 
         * Extracts text. 
         */
-        public  async Task ReadFile(FileInfo fi, StreamWriter swCsv)
-        {
-            var _log4net = log4net.LogManager.GetLogger(typeof(Program));
+        public  async Task<List<EntityToFind>> ReadFile(FileInfo fi)
+        {      
             Console.WriteLine("READ FILE " + fi.Name);
+
+            List<EntityToFind> lstEntities = new List<EntityToFind>();
+            lstEntities.Add(new Amount());
+            lstEntities.Add(new EmissionDate());
 
             FileStream fsPdf = fi.OpenRead();
             var textHeaders = await this._client.ReadInStreamAsync(fsPdf, "it", new string[] { "1" });
@@ -61,27 +65,25 @@ namespace TestOCR
 
             // Display the found text.
             var textUrlFileResults = results.AnalyzeResult.ReadResults;
-            Amount billingImport = new Amount();
-            EmissionDate emissionDate = new EmissionDate();
+            
 
             _log4net.Info("Filename: " + fi.Name);
             foreach (ReadResult page in textUrlFileResults)
             {
                 foreach (Line line in page.Lines)
                 {
-                    if (billingImport.Found && emissionDate.Found)
+                    EntityToFind entNotfound = lstEntities.FirstOrDefault(x => x.Found == false);
+                    if (entNotfound == null)
                         break;
 
                     string textvalue = line.Text.Trim();
-                    billingImport.CheckValue(textvalue);
-                    emissionDate.CheckValue(textvalue);
+                    lstEntities.ForEach(x => x.CheckValue(textvalue));
                     _log4net.Info("Extracted: " + line.Text);
                 }
             }
 
-            string numeroFattura = fi.Name.Split('.')[0];
-            swCsv.WriteLine(numeroFattura + ";" + emissionDate.Value.ToString("dd/MM/yyyy") + ";" + billingImport.Value.ToString("N2"));
-            swCsv.Flush();
+            return lstEntities;
+
         }
     }
 }

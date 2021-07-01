@@ -13,5 +13,10 @@ namespace TestOCR
         public void CheckValue(string textExtracted)
         {
         }
+
+        public string ValueToString()
+        {
+            return "";
+        }
     }
 }

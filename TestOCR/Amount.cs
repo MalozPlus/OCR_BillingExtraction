@@ -25,5 +25,10 @@ namespace TestOCR
             }
         }
 
+        public new string ValueToString()
+        {
+            return this.Value.ToString("N2");
+        }
+
     }
 }
