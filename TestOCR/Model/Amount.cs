@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TestOCR
+namespace TestOCR.Model
 {
     public class Amount : EntityToFind, IEntityToFind
     {
         public float Value;
         private const string Token = "TOTALE CONTO TELEFONICO";
 
-        public new void CheckValue(string textExtracted)
+        public override void CheckValue(string textExtracted)
         {
             if (!this.Found)
             {
@@ -25,7 +25,7 @@ namespace TestOCR
             }
         }
 
-        public new string ValueToString()
+        public override string ValueToString()
         {
             return this.Value.ToString("N2");
         }

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TestOCR.Model;
 
 namespace TestOCR
 {
@@ -34,56 +35,61 @@ namespace TestOCR
         * Extracts text. 
         */
         public  async Task<List<EntityToFind>> ReadFile(FileInfo fi)
-        {      
-            Console.WriteLine("READ FILE " + fi.Name);
-
-            List<EntityToFind> lstEntities = new List<EntityToFind>();
-            lstEntities.Add(new Amount());
-            lstEntities.Add(new EmissionDate());
-
-            FileStream fsPdf = fi.OpenRead();
-            var textHeaders = await this._client.ReadInStreamAsync(fsPdf, "it", new string[] { "1" });
-            // After the request, get the operation location (operation ID)
-            fsPdf.Close();
-            string operationLocation = textHeaders.OperationLocation;
-            Thread.Sleep(2000);
-
-            // Retrieve the URI where the extracted text will be stored from the Operation-Location header.
-            // We only need the ID and not the full URL
-            const int numberOfCharsInOperationId = 36;
-            string operationId = operationLocation.Substring(operationLocation.Length - numberOfCharsInOperationId);
-
-            // Extract the text
-            ReadOperationResult results;
-            Console.WriteLine($"Extracting text from URL file...");
-            do
+        {
+            try 
             {
-                results = await this._client.GetReadResultAsync(Guid.Parse(operationId));
-            }
-            while ((results.Status == OperationStatusCodes.Running ||
-                results.Status == OperationStatusCodes.NotStarted));
+                _log4net.InfoFormat("Reading file: {0}", fi.Name);
 
-            // Display the found text.
-            var textUrlFileResults = results.AnalyzeResult.ReadResults;
-            
+                List<EntityToFind> lstEntities = new List<EntityToFind>();
+                lstEntities.Add(new Amount());
+                lstEntities.Add(new EmissionDate());
 
-            _log4net.Info("Filename: " + fi.Name);
-            foreach (ReadResult page in textUrlFileResults)
-            {
-                foreach (Line line in page.Lines)
+                FileStream fsPdf = fi.OpenRead();
+                var textHeaders = await this._client.ReadInStreamAsync(fsPdf, "it", new string[] { "1" });
+                // After the request, get the operation location (operation ID)
+                fsPdf.Close();
+                string operationLocation = textHeaders.OperationLocation;
+                Thread.Sleep(2000);
+
+                // Retrieve the URI where the extracted text will be stored from the Operation-Location header.
+                // We only need the ID and not the full URL
+                const int numberOfCharsInOperationId = 36;
+                string operationId = operationLocation.Substring(operationLocation.Length - numberOfCharsInOperationId);
+
+                // Extract the text
+                ReadOperationResult results;
+                _log4net.Info("Extracting text from URL file...");
+                do
                 {
-                    EntityToFind entNotfound = lstEntities.FirstOrDefault(x => x.Found == false);
-                    if (entNotfound == null)
-                        break;
-
-                    string textvalue = line.Text.Trim();
-                    lstEntities.ForEach(x => x.CheckValue(textvalue));
-                    _log4net.Info("Extracted: " + line.Text);
+                    results = await this._client.GetReadResultAsync(Guid.Parse(operationId));
                 }
+                while ((results.Status == OperationStatusCodes.Running ||
+                    results.Status == OperationStatusCodes.NotStarted));
+
+                // Display the found text.
+                var textUrlFileResults = results.AnalyzeResult.ReadResults;
+
+                foreach (ReadResult page in textUrlFileResults)
+                {
+                    foreach (Line line in page.Lines)
+                    {                     
+                        if (lstEntities.Where(x => x.Found == true).Count() == lstEntities.Count())
+                            break;
+
+                        string textvalue = line.Text.Trim();
+                        lstEntities.ForEach(x => x.CheckValue(textvalue));
+                        _log4net.Info("Extracted: " + line.Text);
+                    }
+                }
+
+                return lstEntities;
             }
-
-            return lstEntities;
-
+            catch(Exception err)
+            {
+                _log4net.Error("Error reading file;", err);
+                throw err;
+            }
+            
         }
     }
 }
