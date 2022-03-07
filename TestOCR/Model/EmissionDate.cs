@@ -8,13 +8,14 @@ namespace TestOCR.Model
     public class EmissionDate : EntityToFind, IEntityToFind
     {
         public DateTime Value;
-        private const string Token = "Data emissione fattura";
+        private List<string> lstToken = new List<string>() { "Data emissione fattura", "Data di scadenza" };
 
         public override void CheckValue(string textExtracted)
         {
             if (!this.Found)
             {
-                this.MustCheck = this.MustCheck || textExtracted.Equals(Token, StringComparison.InvariantCultureIgnoreCase);
+                this.MustCheck = this.MustCheck
+                        || lstToken.Exists(x => x.Equals(textExtracted, StringComparison.InvariantCultureIgnoreCase));
                 if (this.MustCheck)
                 {
                     var culture = CultureInfo.CreateSpecificCulture("it-IT");

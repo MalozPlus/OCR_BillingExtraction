@@ -19,7 +19,7 @@ namespace TestOCR
     {
 
         // Add your Computer Vision subscription key and endpoint
-        static string fatturePath = "C:\\Users\\l.maletti\\Documents\\Miei\\AcquisizioneFatture\\Fatture\\Test\\";
+        static string fatturePath = "C:\\Users\\l.maletti\\Documents\\Miei\\AcquisizioneFatture\\Wind_LineaFissa\\";
         static string csvFilename = "data.csv";
 
         static Task Main(string[] args)
@@ -53,7 +53,7 @@ namespace TestOCR
                 ocrClient.Authenticate();
 
                 StringBuilder sbCsvContent = new StringBuilder();
-                sbCsvContent.AppendLine("Numero Fattura;Data Emissione;Importo");
+                sbCsvContent.AppendLine("Numero Fattura;Importo;Data Emissione");
 
                 //Get billing files
                 DirectoryInfo dirInfo = new DirectoryInfo(fatturePath);
